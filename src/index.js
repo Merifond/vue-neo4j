@@ -1,6 +1,6 @@
 /* eslint-disable new-cap, no-param-reassign, no-unreachable, no-multi-assign */
 import VueNeo4jConnect from './components/Connect.vue';
-
+//import neo4j from 'neo4j-driver';
 const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
 
 const VueNeo4j = {
@@ -87,20 +87,17 @@ const VueNeo4j = {
          * @return {Promise}
          * @resolves                   Neo4j driver instance
          */
-        function connect(protocol, host, port, username, password, encrypted = true) {
+        function connect(protocol, host, port, username, password, driverOptions = { encrypted : true }) {
             return new Promise((resolve, reject) => {
                 try {
                     const connectionString = `${protocol}://${host}:${port}`;
                     const auth = username && password ? neo4j.auth.basic(username, password) : false;
 
-                    if ( username && password && encrypted ) {
-                        driver = new neo4j.driver(connectionString, auth, {encrypted});
-                    }
-                    else if ( username && password ) {
-                        driver = new neo4j.driver(connectionString, auth);
+                    if ( username && password ) {
+                        driver = new neo4j.driver(connectionString, auth, driverOptions);
                     }
                     else {
-                        driver = new neo4j.driver(connectionString);
+                        driver = new neo4j.driver(connectionString, undefined, driverOptions);
                     }
 
                     resolve(driver);
@@ -124,7 +121,7 @@ const VueNeo4j = {
                     const protocol = 'bolt';
                     const encrypted = tlsLevel !== 'OPTIONAL';
 
-                    return connect(protocol, host, port, username, password, encrypted);
+                    return connect(protocol, host, port, username, password, { encrypted });
                 });
         }
 
